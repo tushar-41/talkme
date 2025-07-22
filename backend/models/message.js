@@ -5,18 +5,25 @@ const messageSchema = new Schema({
     sendBy:{
         type:Schema.Types.ObjectId,
         ref:"User",
+        required:true,
     },
     receivedBy:{
         type:Schema.Types.ObjectId,
         ref:"User",
+        required:true,
     },
     message:{
         type:String,
+        required:true,
     },
-    createdAt:{
-        type:Date,
-        default:Date.now(),
+    type:{
+        type:String,
+        default:"text",
+        enum:[
+            "text","image","file"
+        ],
+        required:true,
     },
-});
+},{timestamps:true}); 
 
 module.exports = mongoose.model("Message",messageSchema);
