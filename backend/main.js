@@ -23,7 +23,7 @@ async function main(){
 };
 
 app.get('/',async(req,res)=>{
-    res.send({name:"tuhsra"})
+    res.send("set up done")
 });
 
 const server = http.createServer(app);
@@ -46,14 +46,14 @@ io.on("connection",(socket) => {
     //Receive broadcast message
     socket.on('sendMessage',async({sendBy,receivedBy,message}) => {
         const newMessage = new Message({sendBy,receivedBy,message});
-        const saved = await Message.save(newMessage);
+        const saved = await newMessage.save();
         console.log(saved);
 
         io.to(receivedBy).emit('receivedMessage',{
             sendBy,
             receivedBy,
             message,
-            createdAt: new Date().toISOString(),
+            createdAt: saved.createdAt,
         })
     });
 
@@ -77,22 +77,12 @@ server.listen(8080,() => {
 
 
 
-
 app.get('/user',async(req,res)=> {
     try {
     const userFind = await user.find({});
     res.send(userFind);
     } catch (error) {
        console.log(error);
-    }
-});
-
-app.get('/api/delete',async(req,res) => {
-    try {
-        const deletedUsers = await user.deleteMany({});
-        res.json(deletedUsers);
-    } catch (error) {
-        console.log(error);
     }
 });
 
