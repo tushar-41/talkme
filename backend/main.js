@@ -76,7 +76,6 @@ server.listen(8080,() => {
 
 
 
-
 app.get('/user',async(req,res)=> {
     try {
     const userFind = await user.find({});
