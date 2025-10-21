@@ -1,8 +1,8 @@
-const express = require('express');
-import messageController from '../controllers/messageController';
+import express from "express";
+import messageController from "../controllers/messageController.js";
 
-const router = express().router;
+const messageRouter = express.Router();
 
-router.get('/chat',messageController.getMessagesBetweenUsers);
+router.get("/:sendBy/:receivedBy", messageController.getMessagesBetweenUsers);
 
-module.exports = router;
+export default messageRouter;

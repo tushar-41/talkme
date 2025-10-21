@@ -1,26 +1,68 @@
-const {User} = require('../models/user');
-const bcrypt = require('bcryptjs');
+import User from "../models/user.js";
+import bcrypt from "bcryptjs";
 
-module.exports.login = async(req,res) => {
-    const {name,email,password = 'secret'} = req.body;
-    const user = await User.findOne({email});
-    const isMatched = bcrypt.compare(password,user.password);
-    if(isMatched){
-        console.log('User detected successfully');
-    }else{
-        console.log('User not registered yet');
-    }  
+const login = async (req, res) => {
+  console.log(req.body);
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.json({
+      ok: false,
+      message: "User not found",
+    });
+  }
+  const isMatched = await bcrypt.compare(password, user.password);
+  if (isMatched) {
+    console.log(`Password is matched user, welcome ${user.name}`);
+    res.json({
+      ok: true,
+      message: "User Found",
+      user: user,
+    });
+  } else {
+    console.log("Password is incorrect");
+    res.json({
+      ok: false,
+      message: "Password is incorrect",
+    });
+  }
 };
 
-module.exports.register = async(req,res) => {
-    const {name,password,email} = req.body;
-    const salt = bcrypt.genSyncSalt(10);
-    const hashedPassword = bcrypt.hashSync(password,salt);
-    const newUser = await User({name,email,hashedPassword});
-    //Or newUser = new User({name:name,email:email,password:password});
-    //newUser.save();
-    await newUser.save();
-    console.log(newUser);
-    res.send(true);
-}
+const register = async (req, res) => {
+  const { name, password, email } = req.body;
+  try {
+    if (!name || !password || !email)
+      return res.send({ ok: false, message: "Incomplete credentials" });
 
+    const isExistingUser = await User.findOne({ email });
+    if (isExistingUser)
+      return res.send({
+        ok: false,
+        message: "User already registered with this email",
+      });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = await User.create({
+      name: name,
+      email: email,
+      password: hashedPassword,
+    });
+
+    const token = generateToken(newUser);
+
+    res.send({
+      ok: true,
+      token: token,
+      user: newUser,
+    });
+  } catch (error) {
+    res.send({
+      ok: false,
+      error: error.message,
+    });
+  }
+};
+
+export default { login, register };
