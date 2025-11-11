@@ -3,6 +3,10 @@ import messageController from "../controllers/messageController.js";
 
 const messageRouter = express.Router();
 
-router.get("/:sendBy/:receivedBy", messageController.getMessagesBetweenUsers);
+messageRouter.get(
+  "/:sendBy/:receivedBy",
+  messageController.messageBetweenUsers
+);
+messageRouter.post("/:receiverId", messageController.newMessage);
 
 export default messageRouter;
