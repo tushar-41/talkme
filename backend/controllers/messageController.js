@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import message from "../models/message.js";
+import { io } from "../main.js";
 
 export const messagesBetweenUsers = async (req, res) => {
   try {
@@ -25,5 +26,28 @@ export const messagesBetweenUsers = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: `${error.message}` });
+  }
+};
+
+export const newMessage = async (req, res) => {
+  const receiverId = req.params.id;
+  const myId = req.user._id;
+  const text = req.body;
+  try {
+    const newMess = await message.create({
+      sendBy: myId,
+      receivedBy: receiverId,
+      message: text,
+      seen: true,
+    });
+
+    io.to("receiverId").emit("newMessage", text);
+
+    res.send({
+      ok: true,
+      message: newMess,
+    });
+  } catch (error) {
+    res.send({ ok: false, error: error.message });
   }
 };
