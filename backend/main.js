@@ -4,6 +4,8 @@ import cors from "cors";
 import { Server } from "socket.io";
 import http from "http";
 import userRouter from "./routes/userRoutes.js";
+import { configDotenv } from "dotenv";
+configDotenv();
 
 const app = express();
 
