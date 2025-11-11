@@ -1,12 +1,24 @@
 import express from "express";
-import messageController from "../controllers/messageController.js";
+import { wrapAsync } from "../utils/wrapAsync.js";
+import { protectedRoute } from "../utils/middleware.js";
+import {
+  messagesBetweenUsers,
+  newMessage,
+  getSidebarUsers,
+} from "../controllers/messageController.js";
 
 const messageRouter = express.Router();
 
 messageRouter.get(
-  "/:sendBy/:receivedBy",
-  messageController.messageBetweenUsers
+  "/getUserForSideaBar",
+  protectedRoute,
+  wrapAsync(getSidebarUsers)
 );
-messageRouter.post("/:receiverId", messageController.newMessage);
+messageRouter.get(
+  "/:receivedId",
+  protectedRoute,
+  wrapAsync(messagesBetweenUsers)
+);
+messageRouter.post("/send/:receiverId", protectedRoute, wrapAsync(newMessage));
 
 export default messageRouter;

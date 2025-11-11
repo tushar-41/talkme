@@ -1,7 +1,7 @@
 import User from "../models/user.js";
 import bcrypt from "bcryptjs";
 
-const login = async (req, res) => {
+export const login = async (req, res) => {
   console.log(req.body);
   const { email, password } = req.body;
   const user = await User.findOne({ email });
@@ -28,7 +28,7 @@ const login = async (req, res) => {
   }
 };
 
-const register = async (req, res) => {
+export const register = async (req, res) => {
   const { name, password, email } = req.body;
   try {
     if (!name || !password || !email)
@@ -64,5 +64,3 @@ const register = async (req, res) => {
     });
   }
 };
-
-export default { login, register };

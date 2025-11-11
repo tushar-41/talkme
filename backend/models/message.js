@@ -24,6 +24,10 @@ const messageSchema = new Schema(
       enum: ["text", "image", "file"],
       required: true,
     },
+    seen: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

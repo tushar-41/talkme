@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import message from "../models/message.js";
-import { io } from "../main.js";
+import { io, userSocketMap } from "../main.js";
+import User from "../models/user.js";
+import Message from "../models/message.js";
 
 export const messagesBetweenUsers = async (req, res) => {
   try {
@@ -29,8 +31,32 @@ export const messagesBetweenUsers = async (req, res) => {
   }
 };
 
+export const getSidebarUsers = async (req, res) => {
+  const userId = req.user._id;
+  const filteredUser = User.find({ _id: { $ne: userId } }).select("-password");
+  const unseenMessages = {};
+
+  const promises = filteredUser.map(async (user) => {
+    const messages = await Message.find({
+      sendBy: user,
+      receivedBy: userId,
+      seen: false,
+    });
+    if (messages.length > 0) {
+      unseenMessages[user] = messages.length;
+    }
+  });
+  await Promise.all(promises);
+
+  res.send({
+    ok: true,
+    user: filteredUser,
+    unseenMessages,
+  });
+};
+
 export const newMessage = async (req, res) => {
-  const receiverId = req.params.id;
+  const receiverId = req.params.receiverId;
   const myId = req.user._id;
   const text = req.body;
   try {
@@ -38,10 +64,12 @@ export const newMessage = async (req, res) => {
       sendBy: myId,
       receivedBy: receiverId,
       message: text,
-      seen: true,
     });
 
-    io.to("receiverId").emit("newMessage", text);
+    const receiverSocketId = userSocketMap[receiverId];
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", newMess);
+    }
 
     res.send({
       ok: true,
