@@ -10,7 +10,7 @@ import {
 const messageRouter = express.Router();
 
 messageRouter.get(
-  "/getUserForSideaBar",
+  "/getUserForSideBar",
   protectedRoute,
   wrapAsync(getSidebarUsers)
 );
